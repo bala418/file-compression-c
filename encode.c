@@ -7,10 +7,6 @@ int unique_char_count;
 
 void encode() {
     encode_menu();
-    // m[3].frequency = 4;
-    // for (int i = 0; i < 5; i++) {
-    //     printf("\n%c - %d\n", m[i].character, m[i].frequency);
-    // }
 }
 
 void encode_menu() {
@@ -168,7 +164,6 @@ void encode_frequency(char *file_name) {
 
     // Copying the map to the final shorter map
     for (int i = 0; i < 256; i++) {
-        // printf("\n%c - %d\n", m[i].character, m[i].frequency);
         if (m[i].frequency > 0) {
             unique[unique_char_count] = m[i];
             unique_char_count++;
@@ -178,6 +173,25 @@ void encode_frequency(char *file_name) {
     for (int i = 0; i < unique_char_count; i++) {
         printf("\n%c - %d", unique[i].character, unique[i].frequency);
     }
+}
+
+int rec[1000006];
+
+void printTree(struct Node *curr, int depth) {
+    int i;
+    if (curr == NULL)
+        return;
+    printf("\t");
+    for (i = 0; i < depth; i++)
+        if (i == depth - 1)
+            printf("%s---", rec[depth - 1] ? "l" : "l");
+        else
+            printf("%s   ", rec[i] ? "l" : "  ");
+    printf("%d\n", curr->symbol);
+    rec[depth] = 1;
+    printTree(curr->left, depth + 1);
+    rec[depth] = 0;
+    printTree(curr->right, depth + 1);
 }
 
 void encode_done() {

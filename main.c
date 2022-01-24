@@ -3,15 +3,6 @@
 #include "headers.h"
 #include <unistd.h>
 
-// void wait() {
-
-//     char ch;
-//     printf("\nEnter to continue : ");
-//     while ((getchar()) != '\n')
-//         ;
-//     // ch = getchar();
-// }
-
 void intro() {
     char heading[100];
     strcpy(heading, "Huffman Coding");

@@ -41,4 +41,6 @@ void encode_frequency();
 // indicates finishing of the process
 void encode_done();
 
+void printTree();
+
 #endif
