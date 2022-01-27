@@ -58,6 +58,16 @@ void buildMinHeap();
 // indicates finishing of the process
 void encode_done();
 
+Node *encode_huffman_tree();
+
+Node *extractMin();
+void insertMinHeap();
+int checkSizeOne();
+
+void printHCodes();
+void printArray();
+int isLeaf();
+void print_tree();
 #endif
 
 // sample inputs
