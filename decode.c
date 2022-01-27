@@ -2,6 +2,8 @@
 #include "headers.h"
 
 codes1 decodes[256];
+codes1 short_map[256];
+int short_map_count = 0;
 
 void decode() {
     decode_menu();
@@ -30,22 +32,109 @@ void decode_menu() {
     }
 }
 
+void print_decode_codes() {
+    printf("\n\nCorresponding Huffman code for characters are : \n");
+    for (int i = 0; i < 256; i++) {
+        if (short_map[i].character != '\0') {
+            printf("\n%c -  %s", short_map[i].character, short_map[i].code);
+        }
+    }
+    printf("\n");
+}
+
+void generate_short_map() {
+    for (int i = 0; i < 256; i++) {
+        if (decodes[i].character != '\0') {
+            short_map[short_map_count] = decodes[i];
+            short_map_count += 1;
+        }
+    }
+    printf("\n");
+}
+
 void decode_file() {
     printf("\n\n=====>\tDecode File\t<=====\n");
     char filename[120];
     printf("\nEnter file name of code map : ");
-    // scanf("%s", &filename);
+    // scanf("%s", filename);
     strcpy(filename, "a.txt-code.dat");
     FILE *fp = fopen(filename, "rb");
     char buffer;
     int i = 0;
     int c;
+    int flag = 0;
+    char temp[20];
     while (fread(&buffer, sizeof(char), 1, fp)) {
-        if (buffer != '1' || buffer != '0') {
-            printf("\n%c", buffer);
+        if (buffer == '1' || buffer == '0') {
+
+            flag = 1;
+            if (buffer == '1') {
+                strcat(temp, "1");
+            } else if (buffer == '0') {
+                strcat(temp, "0");
+            }
+        } else {
+            if (flag == 1) {
+                strcpy(decodes[c].code, temp);
+                flag = 0;
+            }
+            strcpy(temp, "");
             c = buffer;
             decodes[c].character = buffer;
         }
     }
+    strcpy(decodes[c].code, temp);
     fclose(fp);
+
+    generate_short_map();
+
+    printf("\nTotal no of unique characters = %d\n", short_map_count);
+
+    print_decode_codes();
+
+    printf("\nEnter file to decode : ");
+    char todecode[120];
+    scanf("%s", todecode);
+    // strcpy(todecode, "a.txt-encoded.dat");
+
+    FILE *qp, *rp;
+
+    qp = fopen(todecode, "rb");
+
+    if (!qp) {
+        printf("\nFile does not exist please try again\n");
+        return;
+    }
+    rp = fopen("decodedtext.txt", "w");
+    printf("\nDecoded file name : decodedtext.txt\n");
+
+    char buffer2[200] = "";
+    printf("\nEncoded file contents : \n");
+    while (fread(&buffer, sizeof(char), 1, qp)) {
+        if (buffer == '1') {
+            strcat(buffer2, "1");
+        } else if (buffer == '0') {
+            strcat(buffer2, "0");
+        }
+        for (int k = 0; k < short_map_count; k++) {
+            if (strcmp(buffer2, short_map[k].code) == 0) {
+                fprintf(rp, "%c", short_map[k].character);
+                strcpy(buffer2, "");
+            }
+        }
+        printf("%c", buffer);
+    }
+
+    printf("\n");
+
+    fclose(qp);
+    fclose(rp);
+
+    printf("\nReading decoded file contetns...\n");
+    rp = fopen("decodedtext.txt", "r");
+    while (fread(&buffer, sizeof(char), 1, rp)) {
+        printf("%c", buffer);
+    }
+    printf("\n");
+    fclose(rp);
 }
