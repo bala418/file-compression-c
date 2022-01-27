@@ -80,6 +80,7 @@ void encode_input() {
     printf("\nEnter string to add to file : \n\n");
     scanf("\n");
     fgets(s, 250, stdin);
+    s[strcspn(s, "\r\n")] = 0;
     fprintf(fp, "%s", s);
     fclose(fp);
 
@@ -216,7 +217,7 @@ void print_queue(struct MinHeap *minHeap) {
 // Encoding functions
 // ********************************************
 
-// All function calls for encoding
+// All function calls for encoding takes place here
 void encode_begin(char *file_name) {
 
     MinHeap *minHeap;
@@ -237,6 +238,8 @@ void encode_begin(char *file_name) {
     reach_leaf_nodes(root, arr, 0);
 
     print_all_codes();
+
+    encode_to_files(file_name);
 
     encode_done();
 }
@@ -420,8 +423,104 @@ void encode_map(int arr[], int n, char c) {
 
     allcodes[ch].character = c;
     strcpy(allcodes[ch].code, temp);
+}
 
-    // TODO: copy shorter map here
+char *trimwhitespace(char *str) {
+    char *end;
+
+    // Trim leading space
+    while (isspace((unsigned char)*str))
+        str++;
+
+    if (*str == 0) // All spaces?
+        return str;
+
+    // Trim trailing space
+    end = str + strlen(str) - 1;
+    while (end > str && isspace((unsigned char)*end))
+        end--;
+
+    // Write new null terminator character
+    end[1] = '\0';
+
+    return str;
+}
+
+void encode_to_files(char *file_name) {
+    char encoded_file_name[120] = "";
+    char codes_filename[120] = "";
+
+    strcat(encoded_file_name, file_name);
+    strcat(encoded_file_name, "-encoded.txt");
+
+    strcat(codes_filename, file_name);
+    strcat(codes_filename, "-code.txt");
+
+    char encoded_file_name_b[120] = "";
+    char codes_filename_b[120] = "";
+
+    strcat(encoded_file_name_b, file_name);
+    strcat(encoded_file_name_b, "-encoded.dat");
+
+    strcat(codes_filename_b, file_name);
+    strcat(codes_filename_b, "-code.dat");
+
+    printf("\nEncoding to files.......\n");
+    printf("\nEncoded text file name : %s\n", encoded_file_name_b);
+    printf("\nCode map for viewing present in : %s\n", codes_filename_b);
+
+    printf("\nThe visual reprsentation of the binary files can be found in the below text files\n");
+    printf("\nEncoded text file name : %s\n", encoded_file_name);
+    printf("\nCode map for viewing present in : %s\n", codes_filename);
+
+    FILE *fp, *qp, *rp, *qbp, *rbp;
+    ;
+
+    fp = fopen(file_name, "r");
+    qp = fopen(encoded_file_name, "w");
+    qbp = fopen(encoded_file_name_b, "wb");
+
+    char ch;
+    int c;
+    while ((ch = fgetc(fp)) != EOF) {
+        c = ch;
+        fprintf(qp, "%s", allcodes[c].code);
+        trimwhitespace(allcodes[c].code);
+        for (int i = 0; allcodes[c].code[i] != '\0'; i++)
+            fwrite(&allcodes[c].code[i], sizeof(allcodes[c]).code[i], 1, qbp);
+    }
+
+    fclose(fp);
+    fclose(qp);
+    fclose(qbp);
+
+    printf("\nEncoded file contents : \n");
+    qp = fopen(encoded_file_name, "r");
+    while ((ch = fgetc(qp)) != EOF) {
+        printf("%c", ch);
+        c++;
+    }
+    printf("\n");
+    fclose(qp);
+
+    rbp = fopen(codes_filename_b, "wb");
+    rp = fopen(codes_filename, "w");
+    fprintf(rp, "%s", "Corresponding Huffman code for character : \n");
+    char temp;
+    for (int i = 0; i < 256; i++) {
+        temp = allcodes[i].character;
+        if (temp != '\0') {
+            printf("\n%c", temp);
+
+            fwrite(&temp, sizeof(temp), 1, rbp);
+            for (int j = 0; allcodes[i].code[j] != '\0'; j++)
+                fwrite(&allcodes[i].code[j], sizeof(allcodes[i]).code[j], 1, rbp);
+            fprintf(rp, "\n%c -  %s", temp, allcodes[i].code);
+        }
+    }
+    printf("\n");
+    fclose(rp);
+    fclose(rbp);
 }
 
 // indicates finishing of the process

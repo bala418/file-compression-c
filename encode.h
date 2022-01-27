@@ -77,6 +77,10 @@ void print_queue();
 
 void print_all_codes();
 
+void encode_to_files();
+
+char *trimwhitespace();
+
 #endif
 
 // sample inputs

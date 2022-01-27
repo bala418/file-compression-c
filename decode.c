@@ -1,6 +1,8 @@
 #include "decode.h"
 #include "headers.h"
 
+codes1 decodes[256];
+
 void decode() {
     decode_menu();
 }
@@ -29,5 +31,21 @@ void decode_menu() {
 }
 
 void decode_file() {
-    printf("\nEnter name to decode \n");
+    printf("\n\n=====>\tDecode File\t<=====\n");
+    char filename[120];
+    printf("\nEnter file name of code map : ");
+    // scanf("%s", &filename);
+    strcpy(filename, "a.txt-code.dat");
+    FILE *fp = fopen(filename, "rb");
+    char buffer;
+    int i = 0;
+    int c;
+    while (fread(&buffer, sizeof(char), 1, fp)) {
+        if (buffer != '1' || buffer != '0') {
+            printf("\n%c", buffer);
+            c = buffer;
+            decodes[c].character = buffer;
+        }
+    }
+    fclose(fp);
 }
