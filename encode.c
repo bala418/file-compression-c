@@ -1,10 +1,21 @@
 #include "encode.h"
 #include "headers.h"
 
-freq_map m[256], unique[256];
-int unique_char_count;
+// store char frequency for 256 characters
+freq_map m[256];
 
+// store char frequency of only the no of characters
+freq_map unique[256];
+
+// store char frequency in the nodes of heap
 Node *unique1[256];
+
+// stores code for all characters
+codes allcodes[256];
+
+// total no of distinct characters
+int unique_char_count;
+// int unique_char_count2;
 
 // ********************************************
 // Menu functions
@@ -163,6 +174,13 @@ void print_tree(struct Node *curr, int depth) {
     print_tree(curr->right, depth + 1);
 }
 
+void print_huffman_tree(Node *root) {
+    printf("\n\nHuffman Tree : \n");
+    printf("\n");
+    print_tree(root, 0);
+    printf("\n");
+}
+
 // create a node
 Node *create_node(int f, char c) {
     Node *temp = (Node *)malloc(sizeof(Node));
@@ -174,7 +192,7 @@ Node *create_node(int f, char c) {
 }
 
 // check if node is a leaf node
-int isLeaf(struct Node *root) {
+int is_leaf(struct Node *root) {
     return !(root->left) && !(root->right);
 }
 
@@ -183,6 +201,15 @@ void swap_nodes(struct Node **a, struct Node **b) {
     struct Node *t = *a;
     *a = *b;
     *b = t;
+}
+
+void print_queue(struct MinHeap *minHeap) {
+    printf("\n");
+    printf("Current Queue : ");
+    for (int i = 0; i < minHeap->size; i++) {
+        printf("%d ", minHeap->array[i]->freq);
+    }
+    printf("\n");
 }
 
 // ********************************************
@@ -204,10 +231,23 @@ void encode_begin(char *file_name) {
     minHeap = build_heap();
 
     root = encode_huffman_tree(minHeap);
-    print_tree(root, 0);
-    printHCodes(root, arr, 0);
+
+    print_huffman_tree(root);
+
+    reach_leaf_nodes(root, arr, 0);
+
+    print_all_codes();
 
     encode_done();
+}
+void print_all_codes() {
+    printf("\nCorresponding Huffman code for character : \n");
+    for (int i = 0; i < 256; i++) {
+        if (allcodes[i].character != '\0') {
+            printf("\n%c -  %s", allcodes[i].character, allcodes[i].code);
+        }
+    }
+    printf("\n");
 }
 
 // Calculate frequency of all characters
@@ -258,7 +298,7 @@ MinHeap *build_heap() {
         minHeap->array[i] = unique1[i];
 
     minHeap->size = unique_char_count;
-    buildMinHeap(minHeap);
+    build_min_heap(minHeap);
     printf("\nAfter Heapification :\n");
     for (int i = 0; i < minHeap->size; ++i)
         printf("\n%c - %d", minHeap->array[i]->character, minHeap->array[i]->freq);
@@ -268,7 +308,7 @@ MinHeap *build_heap() {
 }
 
 // function to create the minheap
-struct MinHeap *create_min_heap(unsigned capacity) {
+struct MinHeap *create_min_heap(int capacity) {
     struct MinHeap *minHeap = (struct MinHeap *)malloc(sizeof(struct MinHeap));
 
     minHeap->size = 0;
@@ -280,62 +320,64 @@ struct MinHeap *create_min_heap(unsigned capacity) {
 }
 
 // heapify
-void minHeapify(struct MinHeap *minHeap, int idx) {
-    int smallest = idx;
-    int left = 2 * idx + 1;
-    int right = 2 * idx + 2;
+void heapify(struct MinHeap *minHeap, int x) {
+    int least = x;
+    int left = 2 * x + 1;
+    int right = 2 * x + 2;
 
-    if (left < minHeap->size && minHeap->array[left]->freq < minHeap->array[smallest]->freq)
-        smallest = left;
+    if (left < minHeap->size && minHeap->array[left]->freq < minHeap->array[least]->freq)
+        least = left;
 
-    if (right < minHeap->size && minHeap->array[right]->freq < minHeap->array[smallest]->freq)
-        smallest = right;
+    if (right < minHeap->size && minHeap->array[right]->freq < minHeap->array[least]->freq)
+        least = right;
 
-    if (smallest != idx) {
-        swap_nodes(&minHeap->array[smallest], &minHeap->array[idx]);
-        minHeapify(minHeap, smallest);
+    if (least != x) {
+        swap_nodes(&minHeap->array[least], &minHeap->array[x]);
+        heapify(minHeap, least);
     }
 }
 
-void buildMinHeap(MinHeap *minHeap) {
+void build_min_heap(MinHeap *minHeap) {
     int n = minHeap->size - 1;
     int i;
 
     for (i = (n - 1) / 2; i >= 0; --i)
-        minHeapify(minHeap, i);
+        heapify(minHeap, i);
 }
 
 Node *encode_huffman_tree(MinHeap *minHeap) {
+
+    printf("\nBuidling the huffman tree\n");
     Node *left, *right, *top;
-    while (!checkSizeOne(minHeap)) {
-        left = extractMin(minHeap);
-        right = extractMin(minHeap);
+    print_queue(minHeap);
+    while (minHeap->size != 1) {
+        left = pop(minHeap);
+        right = pop(minHeap);
 
-        top = create_node(left->freq + right->freq, '$');
+        printf("\nPopped nodes frequency : %d, %d\n", left->freq, right->freq);
 
+        top = create_node(left->freq + right->freq, '\0');
+        printf("\nNew node frequency : %d\n", top->freq);
         top->left = left;
         top->right = right;
-
-        insertMinHeap(minHeap, top);
+        insert_heap(minHeap, top);
+        // sleep(2);
+        print_queue(minHeap);
     }
-    return extractMin(minHeap);
+    return pop(minHeap);
 }
 
-int checkSizeOne(struct MinHeap *minHeap) {
-    return (minHeap->size == 1);
-}
-
-struct Node *extractMin(struct MinHeap *minHeap) {
+struct Node *pop(struct MinHeap *minHeap) {
     struct Node *temp = minHeap->array[0];
     minHeap->array[0] = minHeap->array[minHeap->size - 1];
 
     --minHeap->size;
-    minHeapify(minHeap, 0);
+    heapify(minHeap, 0);
 
     return temp;
 }
 
-void insertMinHeap(struct MinHeap *minHeap, struct Node *minHeapNode) {
+void insert_heap(struct MinHeap *minHeap, struct Node *minHeapNode) {
     ++minHeap->size;
     int i = minHeap->size - 1;
 
@@ -346,27 +388,40 @@ void insertMinHeap(struct MinHeap *minHeap, struct Node *minHeapNode) {
     minHeap->array[i] = minHeapNode;
 }
 
-void printHCodes(struct Node *root, int arr[], int top) {
+void reach_leaf_nodes(struct Node *root, int arr[], int top) {
     if (root->left) {
         arr[top] = 0;
-        printHCodes(root->left, arr, top + 1);
+        reach_leaf_nodes(root->left, arr, top + 1);
     }
     if (root->right) {
         arr[top] = 1;
-        printHCodes(root->right, arr, top + 1);
+        reach_leaf_nodes(root->right, arr, top + 1);
     }
-    if (isLeaf(root)) {
-        printf("  %c   | ", root->character);
-        printArray(arr, top);
+    if (is_leaf(root)) {
+        encode_map(arr, top, root->character);
     }
 }
 
-void printArray(int arr[], int n) {
-    int i;
-    for (i = 0; i < n; ++i)
-        printf("%d", arr[i]);
+void encode_map(int arr[], int n, char c) {
 
-    printf("\n");
+    int i;
+    int ch = c;
+    char temp[10] = "";
+    for (i = 0; i < n; ++i) {
+        if (arr[i] == 1) {
+            strcat(temp, "1");
+        }
+
+        if (arr[i] == 0) {
+            strcat(temp, "0");
+        }
+    }
+    strcat(temp, "\0");
+
+    allcodes[ch].character = c;
+    strcpy(allcodes[ch].code, temp);
+
+    // TODO: copy shorter map here
 }
 
 // indicates finishing of the process

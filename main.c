@@ -1,7 +1,6 @@
 #include "decode.h"
 #include "encode.h"
 #include "headers.h"
-#include <unistd.h>
 
 void intro() {
     char heading[100];

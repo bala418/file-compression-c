@@ -5,25 +5,28 @@ struct Node {
     struct Node *left;  // used in encode tree ; '0'
     struct Node *right; // used in encode tree ; '1'
     int freq;           // frequency of symbol in file
-    char character;     // the symbol assigned to this node (char)
-    char code;
+    char character;     // the symbol assigned to this node
 };
-
 typedef struct Node Node;
 
 struct freq_map {
     char character;
     int frequency;
 };
+typedef struct freq_map freq_map;
 
 struct MinHeap {
-    unsigned size;
-    unsigned capacity;
+    int size;
+    int capacity;
     struct Node **array;
 };
-
 typedef struct MinHeap MinHeap;
-typedef struct freq_map freq_map;
+
+struct codes {
+    char character;
+    char code[10];
+};
+typedef struct codes codes;
 
 // function to access all the encode functions
 void encode();
@@ -53,22 +56,29 @@ void encode_frequency();
 MinHeap *build_heap();
 MinHeap *create_min_heap();
 void swap_nodes();
-void minHeapify();
-void buildMinHeap();
+void heapify();
+void build_min_heap();
 // indicates finishing of the process
 void encode_done();
 
 Node *encode_huffman_tree();
 
-Node *extractMin();
-void insertMinHeap();
-int checkSizeOne();
+void print_huffman_tree();
 
-void printHCodes();
-void printArray();
-int isLeaf();
+Node *pop();
+void insert_heap();
+
+void reach_leaf_nodes();
+void encode_map(int *, int, char);
+int is_leaf();
 void print_tree();
+
+void print_queue();
+
+void print_all_codes();
+
 #endif
 
 // sample inputs
 // ABBCDBCCDAABBEEEBEAB
+// BCCABBDDAECCBBAEDDCC
