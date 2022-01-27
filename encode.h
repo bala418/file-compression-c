@@ -51,8 +51,8 @@ void encode_frequency();
 
 // function to build the heap
 MinHeap *build_heap();
-MinHeap *createMinH();
-void swapMinHNode();
+MinHeap *create_min_heap();
+void swap_nodes();
 void minHeapify();
 void buildMinHeap();
 // indicates finishing of the process

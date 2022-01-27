@@ -173,6 +173,18 @@ Node *create_node(int f, char c) {
     return temp;
 }
 
+// check if node is a leaf node
+int isLeaf(struct Node *root) {
+    return !(root->left) && !(root->right);
+}
+
+// swap 2 nodes
+void swap_nodes(struct Node **a, struct Node **b) {
+    struct Node *t = *a;
+    *a = *b;
+    *b = t;
+}
+
 // ********************************************
 // Encoding functions
 // ********************************************
@@ -182,6 +194,8 @@ void encode_begin(char *file_name) {
 
     MinHeap *minHeap;
     Node *root;
+    int arr[256];
+
     printf("\n\n=====>\tEncoding File\t<=====\n");
     printf("\nFile name : %s\n", file_name);
 
@@ -190,15 +204,10 @@ void encode_begin(char *file_name) {
     minHeap = build_heap();
 
     root = encode_huffman_tree(minHeap);
-    int arr[256], top;
     print_tree(root, 0);
     printHCodes(root, arr, 0);
 
     encode_done();
-}
-
-int isLeaf(struct Node *root) {
-    return !(root->left) && !(root->right);
 }
 
 // Calculate frequency of all characters
@@ -232,7 +241,7 @@ void encode_frequency(char *file_name) {
             unique_char_count++;
         }
     }
-    printf("\nThe final hashmap of characters and their frequencies are : \n");
+    printf("\nThe hashmap of characters and their frequencies are : \n");
     for (int i = 0; i < unique_char_count; i++) {
         unique1[i] = create_node(unique[i].frequency, unique[i].character);
         printf("\n%c - %d", unique[i].character, unique[i].frequency);
@@ -243,21 +252,23 @@ void encode_frequency(char *file_name) {
 // function to build the heap
 MinHeap *build_heap() {
 
-    struct MinHeap *minHeap = createMinH(unique_char_count);
+    struct MinHeap *minHeap = create_min_heap(unique_char_count);
 
     for (int i = 0; i < unique_char_count; ++i)
         minHeap->array[i] = unique1[i];
 
     minHeap->size = unique_char_count;
     buildMinHeap(minHeap);
-    printf("\nAfter Heapification =>\n");
+    printf("\nAfter Heapification :\n");
     for (int i = 0; i < minHeap->size; ++i)
         printf("\n%c - %d", minHeap->array[i]->character, minHeap->array[i]->freq);
     printf("\n");
 
     return minHeap;
 }
-struct MinHeap *createMinH(unsigned capacity) {
+
+// function to create the minheap
+struct MinHeap *create_min_heap(unsigned capacity) {
     struct MinHeap *minHeap = (struct MinHeap *)malloc(sizeof(struct MinHeap));
 
     minHeap->size = 0;
@@ -268,13 +279,7 @@ struct MinHeap *createMinH(unsigned capacity) {
     return minHeap;
 }
 
-void swapMinHNode(struct Node **a, struct Node **b) {
-    struct Node *t = *a;
-    *a = *b;
-    *b = t;
-}
-
-// Heapify
+// heapify
 void minHeapify(struct MinHeap *minHeap, int idx) {
     int smallest = idx;
     int left = 2 * idx + 1;
@@ -287,7 +292,7 @@ void minHeapify(struct MinHeap *minHeap, int idx) {
         smallest = right;
 
     if (smallest != idx) {
-        swapMinHNode(&minHeap->array[smallest], &minHeap->array[idx]);
+        swap_nodes(&minHeap->array[smallest], &minHeap->array[idx]);
         minHeapify(minHeap, smallest);
     }
 }
