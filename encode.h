@@ -79,7 +79,15 @@ void print_all_codes();
 
 void encode_to_files();
 
-char *trimwhitespace();
+void WriteBit(int);
+
+void Flush_Bits();
+
+void printBits(unsigned char);
+
+void wait();
+
+int multiply();
 
 #endif
 

@@ -17,6 +17,8 @@ codes allcodes[256];
 int unique_char_count;
 // int unique_char_count2;
 
+int temp_count = 0;
+
 // ********************************************
 // Menu functions
 // ********************************************
@@ -116,7 +118,8 @@ void encode_file() {
     }
     fclose(fp);
     printf("\n\nFile read complete\n");
-
+    char wait1 = getchar();
+    wait();
     if (c == 0) {
         printf("\nNo characters in file....");
         printf("\nEnter a file with content or enter content to a new file");
@@ -157,6 +160,12 @@ void encode_confirm(char *file_name) {
 // ********************************************
 
 // Print binary tree in tree form
+
+void wait() {
+    printf("\nPress enter to continue......");
+    char wait = getchar();
+}
+
 int rec[1000006];
 void print_tree(struct Node *curr, int depth) {
     int i;
@@ -180,6 +189,7 @@ void print_huffman_tree(Node *root) {
     printf("\n");
     print_tree(root, 0);
     printf("\n");
+    wait();
 }
 
 // create a node
@@ -251,6 +261,7 @@ void print_all_codes() {
         }
     }
     printf("\n");
+    wait();
 }
 
 // Calculate frequency of all characters
@@ -290,6 +301,8 @@ void encode_frequency(char *file_name) {
         printf("\n%c - %d", unique[i].character, unique[i].frequency);
     }
     printf("\n");
+    char wait2 = getchar();
+    wait();
 }
 
 // function to build the heap
@@ -306,6 +319,7 @@ MinHeap *build_heap() {
     for (int i = 0; i < minHeap->size; ++i)
         printf("\n%c - %d", minHeap->array[i]->character, minHeap->array[i]->freq);
     printf("\n");
+    wait();
 
     return minHeap;
 }
@@ -350,9 +364,10 @@ void build_min_heap(MinHeap *minHeap) {
 
 Node *encode_huffman_tree(MinHeap *minHeap) {
 
-    printf("\nBuidling the huffman tree\n");
+    printf("\nBuilding the huffman tree\n");
     Node *left, *right, *top;
     print_queue(minHeap);
+    wait();
     while (minHeap->size != 1) {
         left = pop(minHeap);
         right = pop(minHeap);
@@ -366,6 +381,7 @@ Node *encode_huffman_tree(MinHeap *minHeap) {
         insert_heap(minHeap, top);
         // sleep(2);
         print_queue(minHeap);
+        wait();
     }
     return pop(minHeap);
 }
@@ -425,26 +441,9 @@ void encode_map(int arr[], int n, char c) {
     strcpy(allcodes[ch].code, temp);
 }
 
-char *trimwhitespace(char *str) {
-    char *end;
-
-    // Trim leading space
-    while (isspace((unsigned char)*str))
-        str++;
-
-    if (*str == 0) // All spaces?
-        return str;
-
-    // Trim trailing space
-    end = str + strlen(str) - 1;
-    while (end > str && isspace((unsigned char)*end))
-        end--;
-
-    // Write new null terminator character
-    end[1] = '\0';
-
-    return str;
-}
+int current_bit = 0;
+unsigned char bit_buffer;
+FILE *f;
 
 void encode_to_files(char *file_name) {
     char encoded_file_name[120] = "";
@@ -466,12 +465,16 @@ void encode_to_files(char *file_name) {
     strcat(codes_filename_b, "-code.dat");
 
     printf("\nEncoding to files.......\n");
-    printf("\nEncoded text file name : %s\n", encoded_file_name_b);
-    printf("\nCode map for viewing present in : %s\n", codes_filename_b);
+    printf("\nEncoded file name : %s\n", encoded_file_name_b);
+    printf("\nCode map for decoding present in : %s\n", codes_filename_b);
+
+    wait();
 
     printf("\nThe visual reprsentation of the binary files can be found in the below text files\n");
     printf("\nEncoded text file name : %s\n", encoded_file_name);
     printf("\nCode map for viewing present in : %s\n", codes_filename);
+
+    wait();
 
     FILE *fp, *qp, *rp, *qbp, *rbp;
     ;
@@ -479,20 +482,29 @@ void encode_to_files(char *file_name) {
     fp = fopen(file_name, "r");
     qp = fopen(encoded_file_name, "w");
     qbp = fopen(encoded_file_name_b, "wb");
+    f = fopen("final.dat", "wb");
 
     char ch;
     int c;
+    char temp2;
     while ((ch = fgetc(fp)) != EOF) {
         c = ch;
         fprintf(qp, "%s", allcodes[c].code);
-        trimwhitespace(allcodes[c].code);
-        for (int i = 0; allcodes[c].code[i] != '\0'; i++)
+        for (int i = 0; allcodes[c].code[i] != '\0'; i++) {
             fwrite(&allcodes[c].code[i], sizeof(allcodes[c]).code[i], 1, qbp);
+            temp2 = allcodes[c].code[i];
+            if (temp2 == '1') {
+                WriteBit(1);
+            } else {
+                WriteBit(0);
+            }
+        }
     }
-
+    Flush_Bits();
     fclose(fp);
     fclose(qp);
     fclose(qbp);
+    fclose(f);
 
     printf("\nEncoded file contents : \n");
     qp = fopen(encoded_file_name, "r");
@@ -505,16 +517,20 @@ void encode_to_files(char *file_name) {
 
     rbp = fopen(codes_filename_b, "wb");
     rp = fopen(codes_filename, "w");
+
+    int k = 0;
     fprintf(rp, "%s", "Corresponding Huffman code for character : \n");
-    char temp;
+    char temp; // used to store character
+
     for (int i = 0; i < 256; i++) {
         temp = allcodes[i].character;
         if (temp != '\0') {
-            printf("\n%c", temp);
 
             fwrite(&temp, sizeof(temp), 1, rbp);
-            for (int j = 0; allcodes[i].code[j] != '\0'; j++)
+            for (int j = 0; allcodes[i].code[j] != '\0'; j++) {
                 fwrite(&allcodes[i].code[j], sizeof(allcodes[i]).code[j], 1, rbp);
+            }
+
             fprintf(rp, "\n%c -  %s", temp, allcodes[i].code);
         }
     }
@@ -523,7 +539,36 @@ void encode_to_files(char *file_name) {
     fclose(rbp);
 }
 
+void WriteBit(int bit) {
+    bit_buffer <<= 1;
+    if (bit)
+        bit_buffer |= 0x1;
+
+    current_bit++;
+    if (current_bit == 8) {
+        fwrite(&bit_buffer, 1, 1, f);
+        current_bit = 0;
+        bit_buffer = 0;
+    }
+}
+
+void Flush_Bits(void) {
+    while (current_bit)
+        WriteBit(0);
+}
+
+// multiply a number m times
+int multiply(int m) {
+    int ans = 1;
+    for (int i = 0; i < m; i++) {
+        ans *= 2;
+    }
+
+    return ans;
+}
+
 // indicates finishing of the process
 void encode_done() {
     printf("\nEncoding completed successfully....\n");
+    wait();
 }

@@ -5,6 +5,10 @@ codes1 decodes[256];
 codes1 short_map[256];
 int short_map_count = 0;
 
+char ans[2000] = "";
+
+int total_count = 0;
+
 void decode() {
     decode_menu();
 }
@@ -19,7 +23,7 @@ void decode_menu() {
         printf("\nEnter your choice : ");
         scanf("%d", &ch);
         if (ch == 1) {
-            decode_file();
+            decode_file_2();
         }
 
         else if (ch == 2) {
@@ -137,4 +141,37 @@ void decode_file() {
     }
     printf("\n");
     fclose(rp);
+    decode_file_2();
+}
+
+void decode_file_2() {
+    FILE *fp, *qp;
+    fp = fopen("final.dat", "rb");
+    qp = fopen("uncompressed.txt", "w");
+    char buffer;
+    char string[3000] = "";
+    char temp[20] = "";
+    while (fread(&buffer, sizeof(char), 1, fp)) {
+        char_to_binary(buffer);
+        // printf("\n%s", temp);
+        // strcat(string, temp);
+    }
+    // printf("\n%s", string);
+    fclose(fp);
+    fclose(qp);
+}
+
+// function to convert char to binary
+void char_to_binary(char ch) {
+    int i = 7;
+    while (i >= 0) {
+        if ((ch & (1 << i)) != 0) {
+            printf("1");
+            strcat(ans, "1");
+        } else {
+            printf("0");
+            strcat(ans, "0");
+        }
+        i--;
+    }
 }

@@ -14,10 +14,12 @@ void print_decode_codes();
 
 void generate_short_map();
 
+void decode_file_2();
+
 struct codes1 {
     char character;
     char code[10];
 };
 typedef struct codes1 codes1;
-
+void char_to_binary(char c);
 #endif
