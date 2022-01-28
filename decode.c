@@ -60,6 +60,7 @@ void generate_short_map() {
 void decode_file() {
 
     short_map_count = 0;
+    total_count = 0;
 
     printf("\n\n=====>\tDecode File\t<=====\n");
     char filename[120];
@@ -130,7 +131,7 @@ void decode_file() {
         return;
     }
 
-    printf("\nDecoded file name : decodedtext.txt\n");
+    printf("\nDecoded file name : uncompressed.txt\n");
 
     decode_file_2(todecode);
     printf("\nDecoded file contents : \n");

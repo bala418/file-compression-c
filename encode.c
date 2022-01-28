@@ -15,18 +15,21 @@ codes allcodes[256];
 
 // total no of distinct characters
 int unique_char_count;
-// int unique_char_count2;
 
+// total no of bits in compressed file
 int number_count = 0;
 
+// total no of characaters in uncompressed file
 int alphabet_count = 0;
 
+// total no of characters in code map
 int code_char_count = 0;
 
 // ********************************************
 // Menu functions
 // ********************************************
 
+// the encode menu
 void encode() {
     encode_menu();
 }
@@ -59,6 +62,7 @@ void encode_menu() {
     }
 }
 
+// write new input for encoding
 void encode_input() {
     printf("\n\n=====>\tNew File\t<=====\n");
     char file_name[100];
@@ -138,6 +142,7 @@ void encode_file() {
     encode_confirm(file_name);
 }
 
+// confirm the encoding process
 void encode_confirm(char *file_name) {
     char choice = 'y';
     while (choice != 'N') {
@@ -165,12 +170,14 @@ void encode_confirm(char *file_name) {
 
 // Print binary tree in tree form
 
+// wait for user input to continue
 void wait() {
     printf("\nPress enter to continue......");
     char wait = getchar();
 }
 
 int rec[1000006];
+// print tree in tree form
 void print_tree(struct Node *curr, int depth) {
     int i;
     if (curr == NULL)
@@ -188,6 +195,7 @@ void print_tree(struct Node *curr, int depth) {
     print_tree(curr->right, depth + 1);
 }
 
+// wrapper function to print tree
 void print_huffman_tree(Node *root) {
     printf("\n\nHuffman Tree : \n");
     printf("\n");
@@ -218,6 +226,7 @@ void swap_nodes(struct Node **a, struct Node **b) {
     *b = t;
 }
 
+// print queue
 void print_queue(struct MinHeap *minHeap) {
     printf("\n");
     printf("Current Queue : ");
@@ -257,6 +266,8 @@ void encode_begin(char *file_name) {
 
     encode_done();
 }
+
+// print huffman codes
 void print_all_codes() {
     printf("\nCorresponding Huffman code for character : \n");
     for (int i = 0; i < 256; i++) {
@@ -358,6 +369,7 @@ void heapify(struct MinHeap *minHeap, int x) {
     }
 }
 
+// build min heap
 void build_min_heap(MinHeap *minHeap) {
     int n = minHeap->size - 1;
     int i;
@@ -366,6 +378,7 @@ void build_min_heap(MinHeap *minHeap) {
         heapify(minHeap, i);
 }
 
+// function to make the huffman tree
 Node *encode_huffman_tree(MinHeap *minHeap) {
 
     printf("\nBuilding the huffman tree\n");
@@ -390,6 +403,7 @@ Node *encode_huffman_tree(MinHeap *minHeap) {
     return pop(minHeap);
 }
 
+// function to pop from queue
 struct Node *pop(struct MinHeap *minHeap) {
     struct Node *temp = minHeap->array[0];
     minHeap->array[0] = minHeap->array[minHeap->size - 1];
@@ -400,6 +414,7 @@ struct Node *pop(struct MinHeap *minHeap) {
     return temp;
 }
 
+// function to insert new node to heap
 void insert_heap(struct MinHeap *minHeap, struct Node *minHeapNode) {
     ++minHeap->size;
     int i = minHeap->size - 1;
@@ -411,6 +426,7 @@ void insert_heap(struct MinHeap *minHeap, struct Node *minHeapNode) {
     minHeap->array[i] = minHeapNode;
 }
 
+// function to reach the leaf nodes
 void reach_leaf_nodes(struct Node *root, int arr[], int top) {
     if (root->left) {
         arr[top] = 0;
@@ -425,6 +441,7 @@ void reach_leaf_nodes(struct Node *root, int arr[], int top) {
     }
 }
 
+// function to encode the map
 void encode_map(int arr[], int n, char c) {
 
     int i;
@@ -449,6 +466,7 @@ int current_bit = 0;
 unsigned char bit_buffer;
 FILE *f;
 
+// function to write to text and binary files
 void encode_to_files(char *file_name) {
     char encoded_file_name[120] = "compressed.txt";
     char codes_filename[120] = "codes.txt";
@@ -473,8 +491,6 @@ void encode_to_files(char *file_name) {
 
     fp = fopen(file_name, "r");
     qp = fopen(encoded_file_name, "w");
-    // qbp = fopen(encoded_file_name_b, "wb");
-    // f = fopen("final.dat", "wb");
     f = fopen(encoded_file_name_b, "wb");
 
     char ch;
@@ -486,7 +502,6 @@ void encode_to_files(char *file_name) {
         alphabet_count++;
         for (int i = 0; allcodes[c].code[i] != '\0'; i++) {
             number_count++;
-            // fwrite(&allcodes[c].code[i], sizeof(allcodes[c]).code[i], 1, qbp);
             temp2 = allcodes[c].code[i];
             if (temp2 == '1') {
                 WriteBit(1);
@@ -498,7 +513,6 @@ void encode_to_files(char *file_name) {
     Flush_Bits();
     fclose(fp);
     fclose(qp);
-    // fclose(qbp);
     fclose(f);
 
     printf("\nEncoded file contents : \n");
@@ -537,6 +551,7 @@ void encode_to_files(char *file_name) {
     fclose(rbp);
 }
 
+// function to wait for 8 bits before writitng a byte to a file
 void WriteBit(int bit) {
     bit_buffer <<= 1;
     if (bit)
@@ -550,12 +565,13 @@ void WriteBit(int bit) {
     }
 }
 
+// function to flush the remaining bits
 void Flush_Bits(void) {
     while (current_bit)
         WriteBit(0);
 }
 
-// indicates finishing of the process
+// indicates finishing of the process and prints the summary
 void encode_done() {
 
     printf("\n===>Encoding Summary<===\n");

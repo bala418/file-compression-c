@@ -2,10 +2,10 @@
 #define ENCODE_H
 
 struct Node {
-    struct Node *left;  // used in encode tree ; '0'
-    struct Node *right; // used in encode tree ; '1'
-    int freq;           // frequency of symbol in file
-    char character;     // the symbol assigned to this node
+    struct Node *left;
+    struct Node *right;
+    int freq;       // frequency of character in file
+    char character; // the character assigned to this node
 };
 typedef struct Node Node;
 
@@ -54,40 +54,62 @@ void encode_frequency();
 
 // function to build the heap
 MinHeap *build_heap();
-MinHeap *create_min_heap();
-void swap_nodes();
-void heapify();
-void build_min_heap();
-// indicates finishing of the process
-void encode_done();
 
+// function to create min heap
+MinHeap *create_min_heap();
+
+// helper function to swap two nodes
+void swap_nodes();
+
+// function to heapify an array
+void heapify();
+
+// function that builds the min heap from the nodes
+void build_min_heap();
+
+// function to build the huffman tree
 Node *encode_huffman_tree();
 
+// wrapper function to print the huffman tree
 void print_huffman_tree();
 
+// function to pop from the queue
 Node *pop();
+
+// function to insert into the heap
 void insert_heap();
 
+// function to reach leaf nodes
 void reach_leaf_nodes();
+
+// function to encode the map
 void encode_map(int *, int, char);
+
+// function to check if node is a leaf node
 int is_leaf();
+
+// function to print tree in tree format
 void print_tree();
 
+// function to print the queue
 void print_queue();
 
+// function to print all codes
 void print_all_codes();
 
+// function to encode the file
 void encode_to_files();
 
+// function to wait for 8 bits before writing byte to file
 void WriteBit(int);
 
+// function to flush remaining bits
 void Flush_Bits();
-
-void printBits(unsigned char);
 
 void wait();
 
-int multiply();
+// indicates finishing of the process
+void encode_done();
 
 #endif
 
