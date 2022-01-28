@@ -17,7 +17,11 @@ codes allcodes[256];
 int unique_char_count;
 // int unique_char_count2;
 
-int temp_count = 0;
+int number_count = 0;
+
+int alphabet_count = 0;
+
+int code_char_count = 0;
 
 // ********************************************
 // Menu functions
@@ -446,23 +450,11 @@ unsigned char bit_buffer;
 FILE *f;
 
 void encode_to_files(char *file_name) {
-    char encoded_file_name[120] = "";
-    char codes_filename[120] = "";
+    char encoded_file_name[120] = "compressed.txt";
+    char codes_filename[120] = "codes.txt";
 
-    strcat(encoded_file_name, file_name);
-    strcat(encoded_file_name, "-encoded.txt");
-
-    strcat(codes_filename, file_name);
-    strcat(codes_filename, "-code.txt");
-
-    char encoded_file_name_b[120] = "";
-    char codes_filename_b[120] = "";
-
-    strcat(encoded_file_name_b, file_name);
-    strcat(encoded_file_name_b, "-encoded.dat");
-
-    strcat(codes_filename_b, file_name);
-    strcat(codes_filename_b, "-code.dat");
+    char encoded_file_name_b[120] = "compressed.dat";
+    char codes_filename_b[120] = "codes.dat";
 
     printf("\nEncoding to files.......\n");
     printf("\nEncoded file name : %s\n", encoded_file_name_b);
@@ -481,8 +473,9 @@ void encode_to_files(char *file_name) {
 
     fp = fopen(file_name, "r");
     qp = fopen(encoded_file_name, "w");
-    qbp = fopen(encoded_file_name_b, "wb");
-    f = fopen("final.dat", "wb");
+    // qbp = fopen(encoded_file_name_b, "wb");
+    // f = fopen("final.dat", "wb");
+    f = fopen(encoded_file_name_b, "wb");
 
     char ch;
     int c;
@@ -490,8 +483,10 @@ void encode_to_files(char *file_name) {
     while ((ch = fgetc(fp)) != EOF) {
         c = ch;
         fprintf(qp, "%s", allcodes[c].code);
+        alphabet_count++;
         for (int i = 0; allcodes[c].code[i] != '\0'; i++) {
-            fwrite(&allcodes[c].code[i], sizeof(allcodes[c]).code[i], 1, qbp);
+            number_count++;
+            // fwrite(&allcodes[c].code[i], sizeof(allcodes[c]).code[i], 1, qbp);
             temp2 = allcodes[c].code[i];
             if (temp2 == '1') {
                 WriteBit(1);
@@ -503,12 +498,13 @@ void encode_to_files(char *file_name) {
     Flush_Bits();
     fclose(fp);
     fclose(qp);
-    fclose(qbp);
+    // fclose(qbp);
     fclose(f);
 
     printf("\nEncoded file contents : \n");
     qp = fopen(encoded_file_name, "r");
     while ((ch = fgetc(qp)) != EOF) {
+
         printf("%c", ch);
         c++;
     }
@@ -518,17 +514,19 @@ void encode_to_files(char *file_name) {
     rbp = fopen(codes_filename_b, "wb");
     rp = fopen(codes_filename, "w");
 
-    int k = 0;
     fprintf(rp, "%s", "Corresponding Huffman code for character : \n");
     char temp; // used to store character
-
+    fwrite(&number_count, sizeof(number_count), 1, rbp);
+    code_char_count += sizeof(number_count);
     for (int i = 0; i < 256; i++) {
         temp = allcodes[i].character;
         if (temp != '\0') {
 
             fwrite(&temp, sizeof(temp), 1, rbp);
+            code_char_count += 1;
             for (int j = 0; allcodes[i].code[j] != '\0'; j++) {
                 fwrite(&allcodes[i].code[j], sizeof(allcodes[i]).code[j], 1, rbp);
+                code_char_count += 1;
             }
 
             fprintf(rp, "\n%c -  %s", temp, allcodes[i].code);
@@ -557,18 +555,20 @@ void Flush_Bits(void) {
         WriteBit(0);
 }
 
-// multiply a number m times
-int multiply(int m) {
-    int ans = 1;
-    for (int i = 0; i < m; i++) {
-        ans *= 2;
-    }
-
-    return ans;
-}
-
 // indicates finishing of the process
 void encode_done() {
+
+    printf("\n===>Encoding Summary<===\n");
+
+    printf("\nTotal no of characters in the file : %d\n", alphabet_count);
+    printf("\nTotal no of bits in the uncompressed file : %d\n", alphabet_count * 8);
+    printf("\nTotal no of bits in the compressed file : %d\n", number_count);
+    printf("\nTotal no of bits in code map : %d\n", code_char_count);
+    printf("\nTotal no of bits after compression : %d + %d = %d\n", number_count, code_char_count, number_count + code_char_count);
+
+    float compression_ratio = ((float)number_count + (float)code_char_count) / (float)(alphabet_count * 8);
+    compression_ratio = compression_ratio * 100;
+    printf("\nCompression ratio : %.2f%%\n", compression_ratio);
     printf("\nEncoding completed successfully....\n");
     wait();
 }

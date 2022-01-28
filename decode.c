@@ -23,7 +23,8 @@ void decode_menu() {
         printf("\nEnter your choice : ");
         scanf("%d", &ch);
         if (ch == 1) {
-            decode_file_2();
+            decode_file();
+
         }
 
         else if (ch == 2) {
@@ -57,17 +58,34 @@ void generate_short_map() {
 }
 
 void decode_file() {
+
+    short_map_count = 0;
+
     printf("\n\n=====>\tDecode File\t<=====\n");
     char filename[120];
-    printf("\nEnter file name of code map : ");
-    // scanf("%s", filename);
-    strcpy(filename, "a.txt-code.dat");
+    printf("\nEnter file name of code map (dat): ");
+    scanf("%s", filename);
+    // check last 3 characters of filename
+    int len = strlen(filename);
+    if (filename[len - 1] != 't' || filename[len - 2] != 'a' || filename[len - 3] != 'd') {
+        printf("\nEnter valid filename (dat)\n");
+        return;
+    }
+
     FILE *fp = fopen(filename, "rb");
+    if (!fp) {
+        printf("\nFile does not exist please try again\n");
+        return;
+    }
     char buffer;
     int i = 0;
     int c;
     int flag = 0;
     char temp[20];
+    fread(&total_count, sizeof(total_count), 1, fp);
+
+    printf("\nTotal no of bits to be read : %d\n", total_count);
+
     while (fread(&buffer, sizeof(char), 1, fp)) {
         if (buffer == '1' || buffer == '0') {
 
@@ -96,25 +114,35 @@ void decode_file() {
 
     print_decode_codes();
 
-    printf("\nEnter file to decode : ");
+    printf("\nEnter file to decode (dat): ");
     char todecode[120];
     scanf("%s", todecode);
-    // strcpy(todecode, "a.txt-encoded.dat");
+    int len1 = strlen(todecode);
+    if (todecode[len1 - 1] != 't' || todecode[len1 - 2] != 'a' || todecode[len1 - 3] != 'd') {
+        printf("\nEnter valid filename (dat)\n");
+        return;
+    }
 
     FILE *qp, *rp;
-
-    qp = fopen(todecode, "rb");
 
     if (!qp) {
         printf("\nFile does not exist please try again\n");
         return;
     }
-    rp = fopen("decodedtext.txt", "w");
+
     printf("\nDecoded file name : decodedtext.txt\n");
 
+    decode_file_2(todecode);
+    printf("\nDecoded file contents : \n");
+    for (int i = 0; i < total_count; i++) {
+        printf("%c", ans[i]);
+    }
+
+    rp = fopen("uncompressed.txt", "w");
+    printf("\n\nUncompressed file : \n");
     char buffer2[200] = "";
-    printf("\nEncoded file contents : \n");
-    while (fread(&buffer, sizeof(char), 1, qp)) {
+    for (int i = 0; i < total_count; i++) {
+        buffer = ans[i];
         if (buffer == '1') {
             strcat(buffer2, "1");
         } else if (buffer == '0') {
@@ -124,39 +152,25 @@ void decode_file() {
             if (strcmp(buffer2, short_map[k].code) == 0) {
                 fprintf(rp, "%c", short_map[k].character);
                 strcpy(buffer2, "");
+                printf("%c", short_map[k].character);
             }
         }
-        printf("%c", buffer);
-    }
-
-    printf("\n");
-
-    fclose(qp);
-    fclose(rp);
-
-    printf("\nReading decoded file contetns...\n");
-    rp = fopen("decodedtext.txt", "r");
-    while (fread(&buffer, sizeof(char), 1, rp)) {
-        printf("%c", buffer);
     }
     printf("\n");
+
     fclose(rp);
-    decode_file_2();
 }
 
-void decode_file_2() {
+void decode_file_2(char *filenmae) {
     FILE *fp, *qp;
-    fp = fopen("final.dat", "rb");
+    fp = fopen(filenmae, "rb");
     qp = fopen("uncompressed.txt", "w");
     char buffer;
     char string[3000] = "";
     char temp[20] = "";
     while (fread(&buffer, sizeof(char), 1, fp)) {
         char_to_binary(buffer);
-        // printf("\n%s", temp);
-        // strcat(string, temp);
     }
-    // printf("\n%s", string);
     fclose(fp);
     fclose(qp);
 }
@@ -166,10 +180,8 @@ void char_to_binary(char ch) {
     int i = 7;
     while (i >= 0) {
         if ((ch & (1 << i)) != 0) {
-            printf("1");
             strcat(ans, "1");
         } else {
-            printf("0");
             strcat(ans, "0");
         }
         i--;
